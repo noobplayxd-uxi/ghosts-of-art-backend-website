@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ghosts of Art | Your Cart</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Roboto', sans-serif; margin:0; padding:40px;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+            color:white; min-height: 100vh;
+        }
+        .cart-container { max-width: 800px; margin: 0 auto; background: rgba(255,255,255,0.05); padding: 30px; border-radius: 20px; border: 1px solid #333; }
+        h2 { border-bottom: 1px solid #444; padding-bottom: 15px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #222; }
+        .item-info h4 { margin: 0; font-size: 1.2em; }
+        .item-info p { margin: 5px 0 0; color: #888; }
+        .quantity-controls { display: flex; align-items: center; gap: 15px; }
+        .btn-qty { background: #333; color: white; border: none; padding: 5px 12px; border-radius: 5px; cursor: pointer; }
+        .btn-remove { background: transparent; color: #ff5555; border: none; cursor: pointer; margin-left: 20px; }
+        
+        .cart-footer { margin-top: 30px; text-align: right; }
+        .total-price { font-size: 2em; font-weight: bold; margin-bottom: 20px; }
+        
+        .actions { display: flex; justify-content: space-between; align-items: center; }
+        .back-btn { color: #aaa; text-decoration: none; font-weight: bold; }
+        .buy-btn { background: white; color: black; padding: 15px 60px; border: none; border-radius: 10px; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: 0.3s; }
+        .buy-btn:hover { background: #ddd; }
+        .buy-btn:disabled { background: #555; color: #888; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<div class="cart-container">
+    <h2>Your Cart</h2>
+    <div id="cart-list"></div>
+
+    <div class="cart-footer">
+        <div class="total-price">Total: ₹<span id="grand-total">0</span></div>
+        <div class="actions">
+            <a href="Store.html" class="back-btn">← Back to Shop</a>
+            <button class="buy-btn" id="checkout-button" onclick="goToCheckout()">Buy Now</button>
+        </div>
+    </div>
+</div>
+
+<script src="cart.js"></script>
+
+<script>
+    // 1. UPDATED: Logic to send data to Manager (Google Sheet)
+    async function goToCheckout() {
+        const cartList = getCart();
+        const user = JSON.parse(localStorage.getItem("ghostUser"));
+        const buyBtn = document.getElementById('checkout-button');
+
+        // Safety Checks
+        if (cartList.length === 0) {
+            alert("Your cart is empty!");
+            return;
+        }
+        if (!user) {
+            alert("Please sign up first!");
+            window.location.href = 'web.html';
+            return;
+        }
+
+        // Visual Feedback: Let the user know it's working
+        buyBtn.innerText = "Processing...";
+        buyBtn.disabled = true;
+
+        // Calls the processOrder function inside your cart.js
+        try {
+            await processOrder();
+        } catch (err) {
+            alert("Cloud Error. Check your internet connection.");
+            buyBtn.innerText = "Buy Now";
+            buyBtn.disabled = false;
+        }
+    }
+
+    // 2. Display logic (stays mostly the same)
+    function displayCart() {
+        const cartList = getCart();
+        const listDiv = document.getElementById('cart-list');
+        const totalSpan = document.getElementById('grand-total');
+        listDiv.innerHTML = "";
+        let total = 0;
+
+        if (cartList.length === 0) {
+            listDiv.innerHTML = "<p style='color:#666;'>Your cart is empty.</p>";
+        }
+
+        cartList.forEach((item, index) => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'cart-item';
+            itemDiv.innerHTML = `
+                <div class="item-info">
+                    <h4>${item.name}</h4>
+                    <p>₹${item.price}</p>
+                </div>
+                <div class="quantity-controls">
+                    <button class="btn-qty" onclick="handleQtyChange(${index}, -1)">-</button>
+                    <span>${item.qty}</span>
+                    <button class="btn-qty" onclick="handleQtyChange(${index}, 1)">+</button>
+                    <button class="btn-remove" onclick="handleRemove(${index})">Remove</button>
+                </div>
+            `;
+            listDiv.appendChild(itemDiv);
+            total += (item.price * item.qty);
+        });
+
+        totalSpan.innerText = total;
+    }
+
+    function handleQtyChange(index, delta) {
+        changeQty(index, delta);
+        displayCart();
+    }
+
+    function handleRemove(index) {
+        removeFromCart(index);
+        displayCart();
+    }
+
+    window.onload = displayCart;
+</script>
+</body>
+</html>

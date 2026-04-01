@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ghosts of Art | Private Collection</title>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .bg-glow {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: url('https://www.transparenttextures.com/patterns/dark-matter.png');
+      opacity: 0.3;
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+    }
+
+    h1 {
+      font-family: 'Dancing Script', cursive;
+      font-size: 5rem;
+      margin: 0;
+      color: #ffffff;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+      animation: fadeInDown 1.5s ease-out;
+    }
+
+    h3 { font-weight: 300; color: #00ffcc; letter-spacing: 2px; margin-top: 5px; }
+
+    p {
+        font-weight: 300;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: #888;
+        margin-bottom: 40px;
+        font-size: 0.8rem;
+        animation: fadeInUp 2s ease-out;
+    }
+
+    #returning-user-msg {
+        color: #00ffcc;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+        display: none; /* Only shows if user exists */
+    }
+
+    .visit-btn {
+      padding: 18px 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      background: white;
+      color: black; 
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-decoration: none;
+      display: inline-block;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+
+    .visit-btn:hover {
+      background: #00ffcc;
+      transform: scale(1.1);
+      box-shadow: 0 15px 30px rgba(0, 255, 204, 0.3);
+    }
+
+    /* AUTH OVERLAY STYLES */
+    .auth-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.95);
+      display: none; justify-content: center; align-items: center;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+    .auth-card {
+      background: #111; padding: 40px; border-radius: 20px;
+      border: 1px solid #333; width: 90%; max-width: 400px; text-align: center;
+    }
+    .auth-card h2 { font-family: 'Dancing Script', cursive; font-size: 2.5rem; margin-bottom: 10px; color: #00ffcc; }
+    .auth-card input {
+      width: 100%; padding: 12px; margin: 10px 0;
+      background: #000; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box;
+    }
+    .error-text { color: #ff5555; font-size: 0.8rem; margin-bottom: 10px; display: none; }
+
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<div class="hero-content">
+  <h1>Ghosts in Art</h1>
+  <h3>Hunt of Art</h3>
+  <p>Where silence speaks in colors</p>
+  
+  <div id="returning-user-msg">Welcome back, Traveler</div>
+
+  <button class="visit-btn" onclick="checkEntrance()">
+    Visit Our Store
+  </button>
+</div>
+
+<div id="entranceAuth" class="auth-overlay">
+    <div class="auth-card">
+        <h2>Welcome</h2>
+        <p style="color: #888; font-size: 0.7rem; margin-bottom: 20px; letter-spacing: 1px;">IDENTIFY YOURSELF TO ENTER</p>
+        
+        <input type="text" id="ent-name" placeholder="Full Name">
+        <input type="email" id="ent-email" placeholder="Email (name@example.com)">
+        <input type="tel" id="ent-phone" placeholder="Phone (10 Digits)" maxlength="10">
+        
+        <p id="error-msg" class="error-text"></p>
+
+        <button onclick="performEntrance()" style="width:100%; padding:15px; background:white; color:black; border:none; border-radius:50px; font-weight:bold; cursor:pointer; margin-top:10px; text-transform:uppercase;">
+            Enter Store
+        </button>
+        <p onclick="document.getElementById('entranceAuth').style.display='none'" style="color: #444; cursor: pointer; margin-top: 20px; font-size: 0.8rem;">Dismiss</p>
+    </div>
+</div>
+
+<script>
+    // 1. On Load: Check if user exists and personalize the screen
+    window.onload = function() {
+        const user = JSON.parse(localStorage.getItem("ghostUser"));
+        if (user && user.name) {
+            const msgBox = document.getElementById('returning-user-msg');
+            msgBox.innerText = `Welcome back, ${user.name}`;
+            msgBox.style.display = 'block';
+        }
+    };
+
+    // 2. Logic: Should we show the form or just go to store?
+    function checkEntrance() {
+        const user = localStorage.getItem("ghostUser");
+        if (user) {
+            // "The Fast Lane": Go directly to Store
+            window.location.href = 'Store.html';
+        } else {
+            // "The Guest Lane": Show Sign-up
+            document.getElementById('entranceAuth').style.display = 'flex';
+        }
+    }
+
+    // 3. Validation and Saving
+    function performEntrance() {
+        const name = document.getElementById('ent-name').value;
+        const email = document.getElementById('ent-email').value;
+        const phone = document.getElementById('ent-phone').value;
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const phoneRegex = /^[0-9]{10}$/;
+
+        if (name.trim().length < 2) { showError("Name is too short."); return; }
+        if (!emailRegex.test(email)) { showError("Invalid email format."); return; }
+        if (!phoneRegex.test(phone)) { showError("Enter a 10-digit phone number."); return; }
+
+        // Success: Store the object
+        localStorage.setItem("ghostUser", JSON.stringify({ name, email, phone }));
+        window.location.href = 'Store.html';
+    }
+
+    function showError(text) {
+        const eb = document.getElementById('error-msg');
+        eb.innerText = text;
+        eb.style.display = 'block';
+    }
+</script>
+
+</body>
+</html>

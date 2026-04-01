@@ -1,0 +1,6 @@
+{
+    "revenue": [0, 200, 500, 450, 1200, 1100, 2500],
+    "labels": ["Start", "Sale 1", "Sale 2", "Sale 3", "Sale 4", "Sale 5", "Latest"],
+    "total": 2500,
+    "count": 6
+}

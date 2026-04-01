@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manager Dashboard | Ghosts of Art</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #050505; color: white; margin: 0; padding: 20px; }
+        .dashboard { max-width: 900px; margin: auto; }
+        
+        .stats-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px; }
+        .card { background: #111; padding: 30px; border-radius: 12px; border: 1px solid #222; text-align: center; position: relative; }
+        .card h3 { font-size: 0.8em; color: #666; text-transform: uppercase; margin: 0; }
+        .card p { font-size: 3em; margin: 15px 0 0; color: #00ffcc; font-weight: bold; }
+        .card-accent { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: #00ffcc; border-radius: 0 0 12px 12px; }
+
+        .status-box { background: #111; padding: 15px; border-radius: 12px; border: 1px solid #222; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .status-indicator { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #00ffcc; margin-right: 8px; }
+        
+        /* 2. Chart Container */
+        .chart-box { background: #111; padding: 20px; border-radius: 12px; border: 1px solid #222; height: 350px; margin-top: 20px; }
+
+        .header-controls { display: flex; gap: 10px; }
+        .refresh-btn { background: #00ffcc; color: black; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .refresh-btn:hover { background: #00cca3; }
+        .logout-btn { background: transparent; color: #ff4444; border: 1px solid #ff4444; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 30px;">
+        <h1 style="letter-spacing:2px; margin:0;">GHOSTS OF ART <span style="font-weight:100; color:#444;">| ECONOMICS</span></h1>
+        <div class="header-controls">
+            <button class="refresh-btn" onclick="loadDashboard()">REFRESH DATA</button>
+            <button class="logout-btn" onclick="logout()">LOGOUT</button>
+        </div>
+    </div>
+
+    <div class="status-box">
+        <div><span class="status-indicator"></span><span id="sync-status">SYNCED WITH CLOUD</span></div>
+        <div style="color: #666; font-size: 13px;">Market Status: <span id="market-msg" style="color:#00ffcc">STABLE</span></div>
+    </div>
+
+    <div class="stats-row">
+        <div class="card">
+            <h3>Total Revenue</h3>
+            <p id="stat-revenue">₹0</p>
+            <div class="card-accent"></div>
+        </div>
+        <div class="card">
+            <h3>Orders Processed</h3>
+            <p id="stat-count">0</p>
+            <div class="card-accent"></div>
+        </div>
+    </div>
+
+    <div class="chart-box">
+        <canvas id="economicsChart"></canvas>
+    </div>
+</div>
+
+<script>
+    // Security Check
+    if (!sessionStorage.getItem("adminActive")) {
+        window.location.href = "admin-login.html";
+    }
+
+    let myChart = null; // Global variable to store the chart instance
+
+    async function loadDashboard() {
+        const syncStatus = document.getElementById('sync-status');
+        syncStatus.innerText = "REFRESHING...";
+
+        try {
+            const response = await fetch('http://localhost:5000/admin/economics');
+            const data = await response.json();
+
+            // Update Text Data
+            document.getElementById('stat-revenue').innerText = "₹" + (data.total || 0).toLocaleString();
+            document.getElementById('stat-count').innerText = data.count || 0;
+
+            // Trigger Chart Drawing
+            updateChart(data.labels || [], data.revenue || []);
+            
+            syncStatus.innerText = "SYNCED WITH CLOUD (MONGODB ATLAS)";
+            syncStatus.style.color = "#00ffcc";
+
+        } catch (err) {
+            console.error("Cloud Connection Failed", err);
+            syncStatus.innerText = "ERROR: CLOUD OFFLINE";
+            syncStatus.style.color = "#ff4444";
+        }
+    }
+
+    function updateChart(labels, revenue) {
+        const ctx = document.getElementById('economicsChart').getContext('2d');
+        
+        // Prevent Chart Memory Leaks (Important for 2GB RAM)
+        if (myChart) { myChart.destroy(); }
+
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Revenue Trend',
+                    data: revenue,
+                    borderColor: '#00ffcc',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#00ffcc',
+                    pointRadius: 5,
+                    tension: 0.3, // Adds a slight curve
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#222' }, ticks: { color: '#666' } },
+                    x: { grid: { display: false }, ticks: { color: '#666' } }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+
+    function logout() {
+        sessionStorage.clear();
+        window.location.href = "admin-login.html";
+    }
+
+    // Initial Load
+    loadDashboard();
+</script>
+</body>
+</html>

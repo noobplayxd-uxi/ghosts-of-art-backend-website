@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manager Entry | Ghosts of Art</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0a0a0a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-card { background: #111; padding: 40px; border-radius: 15px; border: 1px solid #00ffcc; width: 320px; box-shadow: 0 0 20px rgba(0,255,204,0.1); text-align: center; }
+        h2 { color: #00ffcc; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 30px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 8px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: #00ffcc; box-shadow: 0 0 5px rgba(0,255,204,0.3); }
+        button { width: 100%; padding: 12px; background: #00ffcc; color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        button:hover { background: #00cca3; transform: scale(1.02); }
+        #status { font-size: 13px; margin-top: 15px; min-height: 18px; }
+        .error { color: #ff4444; }
+        .success { color: #00ffcc; }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <h2>Manager Gate</h2>
+    <input type="text" id="user" placeholder="Manager Username">
+    <input type="password" id="pass" placeholder="Secret Access Key">
+    <button id="loginBtn" onclick="attemptLogin()">Authorize Access</button>
+    <div id="status"></div>
+</div>
+
+<script>
+    async function attemptLogin() {
+        const user = document.getElementById('user').value;
+        const pass = document.getElementById('pass').value;
+        const status = document.getElementById('status');
+        const btn = document.getElementById('loginBtn');
+
+        // Reset UI
+        status.className = "";
+        status.innerText = "Connecting to Cloud...";
+        btn.disabled = true;
+
+        try {
+            // Talking to our Node server on Port 5000
+            const response = await fetch('http://localhost:5000/admin-gate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user, pass })
+            });
+
+            const data = await response.json();
+
+            if (data.auth) {
+                status.className = "success";
+                status.innerText = "ACCESS GRANTED. Redirecting...";
+                
+                // Save session so adminpanel.html knows we're legit
+                sessionStorage.setItem("adminActive", "true");
+                sessionStorage.setItem("adminToken", data.token);
+                
+                // Move to the dashboard after a short delay
+                setTimeout(() => {
+                    window.location.href = "adminpanel.html"; 
+                }, 1000);
+            } else {
+                btn.disabled = false;
+                status.className = "error";
+                status.innerText = "DENIED: Invalid Credentials.";
+            }
+        } catch (err) {
+            btn.disabled = false;
+            status.className = "error";
+            status.innerText = "OFFLINE: Start server.js first!";
+            console.error("Connection failed:", err);
+        }
+    }
+</script>
+</body>
+</html>

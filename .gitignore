@@ -1,0 +1,12 @@
+# 1. Ignore the heavy library folder (Save 2GB RAM & GitHub space)
+node_modules/
+
+# 2. Ignore your secret database passwords and Razorpay keys
+.env
+
+# 3. Ignore system files that Windows 7 creates
+Thumbs.db
+desktop.ini
+
+# 4. Ignore local test 
+test-db.js

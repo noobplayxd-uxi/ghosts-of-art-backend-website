@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ghosts of Art | My Account</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Roboto', sans-serif; margin:0; padding:20px;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+            color:white; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .account-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid #333;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        h1 { color: #00ffcc; margin-bottom: 20px; font-weight: 300; letter-spacing: 2px; }
+        
+        .info-group {
+            text-align: left;
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-left: 3px solid #00ffcc;
+        }
+        .info-label { color: #666; font-size: 0.75em; text-transform: uppercase; margin-bottom: 2px; }
+        .info-value { color: #eee; font-size: 1em; font-weight: bold; margin-bottom: 12px; }
+
+        /* --- NEW: ORDER HISTORY STYLE --- */
+        .order-history {
+            text-align: left;
+            margin-bottom: 25px;
+            max-height: 150px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .order-history h3 { font-size: 0.9em; color: #888; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px;}
+        .order-item {
+            background: rgba(255,255,255,0.02);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .btn-container { display: flex; flex-direction: column; gap: 10px; }
+        
+        .back-btn {
+            background: transparent; color: #888; border: 1px solid #444;
+            padding: 12px; border-radius: 50px; text-decoration: none; font-size: 0.9em;
+            transition: 0.3s; text-align: center;
+        }
+        .back-btn:hover { border-color: #eee; color: #eee; }
+
+        .logout-btn {
+            background: transparent; color: #ff4444; border: 1px solid #ff4444;
+            padding: 12px; border-radius: 50px; cursor: pointer;
+            font-weight: bold; transition: 0.3s;
+        }
+        .logout-btn:hover { background: #ff4444; color: white; transform: scale(1.02); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom scrollbar for 2GB RAM efficiency (less visual bloat) */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="account-card">
+    <h1>Account Profile</h1>
+    
+    <div class="info-group">
+        <div class="info-label">Full Name</div>
+        <div id="display-name" class="info-value">Loading...</div>
+
+        <div class="info-label">Email Address</div>
+        <div id="display-email" class="info-value">---</div>
+
+        <div class="info-label">Phone Number</div>
+        <div id="display-phone" class="info-value">---</div>
+    </div>
+
+    <div class="order-history">
+        <h3>Recent Orders</h3>
+        <div id="order-list">
+            <p style="color:#444; font-size:0.8em;">No orders found.</p>
+        </div>
+    </div>
+
+    <div class="btn-container">
+        <a href="Store.html" class="back-btn">Return to Gallery</a>
+        <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    </div>
+</div>
+
+<script src="account.js"></script>
+</body>
+</html>

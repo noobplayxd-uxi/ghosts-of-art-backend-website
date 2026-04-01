@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ghosts of Art | Community</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Roboto', sans-serif; margin:0; padding:40px;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+            color:white; min-height: 100vh;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        
+        .header-area { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 20px;
+        }
+        
+        .nav-links { text-align: right; }
+        .back-btn { color: #888; text-decoration: none; font-size: 0.9em; display: block; margin-bottom: 10px; }
+        .back-btn:hover { color: #fff; }
+
+        .insta-btn {
+            display: inline-block;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); 
+            color: white; text-decoration: none; padding: 8px 18px; border-radius: 50px;
+            font-size: 0.85em; font-weight: bold; transition: 0.3s;
+        }
+
+        .input-section { 
+            background: rgba(255,255,255,0.05); padding: 25px; 
+            border-radius: 20px; border: 1px solid #333; margin-bottom: 40px;
+        }
+        #user-welcome { color: #888; margin-bottom: 15px; font-size: 0.9em; }
+        
+        textarea { 
+            width: 100%; height: 100px; background: #000; border: 1px solid #444; 
+            color: white; padding: 15px; border-radius: 12px; resize: none; 
+            box-sizing: border-box; font-size: 1em; outline: none;
+        }
+        textarea:focus { border-color: #fff; }
+
+        .post-btn { 
+            background: white; color: black; border: none; padding: 12px 40px; 
+            border-radius: 50px; font-weight: bold; cursor: pointer; margin-top: 15px;
+        }
+
+        /* Comment List Styles */
+        .comment-item { 
+            background: rgba(255,255,255,0.02); padding: 20px; 
+            border-radius: 15px; border-bottom: 1px solid #222; margin-bottom: 15px;
+        }
+        .comment-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .author-name { font-weight: bold; color: #00ffcc; }
+        .timestamp { font-size: 0.75em; color: #555; }
+        .message-text { color: #bbb; line-height: 1.5; word-wrap: break-word; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-area">
+        <h1>Community Board</h1>
+        <div class="nav-links">
+            <a href="Store.html" class="back-btn">← Back to Store</a>
+            <a href="https://www.instagram.com/ghost.in_pen_/" target="_blank" class="insta-btn">Contact Owner</a>
+        </div>
+    </div>
+
+    <div class="input-section">
+        <div id="user-welcome">Checking session...</div>
+        <textarea id="comment-input" placeholder="What's on your mind?"></textarea>
+        <div style="text-align: right;">
+            <button class="post-btn" onclick="handlePost()">Post Message</button>
+        </div>
+    </div>
+
+    <div id="comment-list"></div>
+</div>
+
+<script>
+    // --- CORE LOGIC ---
+    let userSession = null;
+
+    window.onload = function() {
+        // 1. Check Session
+        const sessionData = localStorage.getItem("ghostUser");
+        if (!sessionData) {
+            alert("Please sign up at the entrance to post a message.");
+            window.location.href = 'web.html';
+            return;
+        }
+        
+        userSession = JSON.parse(sessionData);
+        document.getElementById('user-welcome').innerText = `Signed in as: ${userSession.name} (Email hidden for safety)`;
+        
+        // 2. Load existing comments
+        loadComments();
+    };
+
+    function handlePost() {
+        const input = document.getElementById('comment-input');
+        const message = input.value.trim();
+
+        if (message.length < 3) {
+            alert("Please write a bit more!");
+            return;
+        }
+
+        // Create the new comment object
+        const newComment = {
+            name: userSession.name, 
+            text: message,
+            time: new Date().toLocaleString()
+        };
+
+        // Save to LocalStorage
+        let existingComments = JSON.parse(localStorage.getItem("ghostComments") || "[]");
+        existingComments.unshift(newComment); 
+        localStorage.setItem("ghostComments", JSON.stringify(existingComments));
+
+        // UI Updates
+        input.value = "";
+        loadComments();
+    }
+
+    function loadComments() {
+        const list = document.getElementById('comment-list');
+        const comments = JSON.parse(localStorage.getItem("ghostComments") || "[]");
+        
+        if (comments.length === 0) {
+            list.innerHTML = `<p style="text-align:center; color:#444; margin-top:40px;">No messages yet. Be the first!</p>`;
+            return;
+        }
+
+        list.innerHTML = comments.map(c => {
+            // Safety Check: Prevent "undefined" if a session was reset but comments remain
+            if(!c.name || !c.text) return ''; 
+
+            return `
+                <div class="comment-item">
+                    <div class="comment-header">
+                        <span class="author-name">@${c.name}</span>
+                        <span class="timestamp">${c.time}</span>
+                    </div>
+                    <div class="message-text">${escapeHTML(c.text)}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Security: Escaping HTML helps prevent XSS attacks (Cross-Site Scripting)
+    function escapeHTML(str) {
+        return str.replace(/[&<>"']/g, function(m) {
+            return {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[m];
+        });
+    }
+</script>
+
+</body>
+</html>
