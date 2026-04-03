@@ -1,4 +1,4 @@
-// account.js - GHOSTS OF ART SESSION MANAGER
+// GHOSTS OF ART SESSION MANAGER
 
 // 1. Initial Handshake: Run when DOM is ready
 document.addEventListener("DOMContentLoaded", function() {
@@ -70,7 +70,7 @@ function handleLogout() {
         localStorage.removeItem("ghostUser");
         localStorage.removeItem("ghostCart"); 
         
-        // NOTE: We do NOT remove 'lastGhostOrderID' so the receipt stays on the device
+       
         
         window.location.href = "web.html";
     }
